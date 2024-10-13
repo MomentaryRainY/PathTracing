@@ -96,60 +96,51 @@ inline bool Bounds3::IntersectP(const Ray& ray, const Vector3f& invDir,
     // invDir: ray direction(x,y,z), invDir=(1.0/x,1.0/y,1.0/z), use this because Multiply is faster that Division
     // dirIsNeg: ray direction(x,y,z), dirIsNeg=[int(x>0),int(y>0),int(z>0)], use this to simplify your logic
     // TODO test if ray bound intersects
-    // Vector3f tn = (pMin - ray.origin) * invDir;
-    // Vector3f tx = (pMax - ray.origin) * invDir;
-    
-    // if (!dirIsNeg[0]) std::swap(tn.x, tx.x);
+    float t_inX,t_outX,t_inY,t_outY,t_inZ,t_outZ;
+    if (ray.direction.x >0 ){
+        t_inX = (pMin.x - ray.origin.x) * invDir.x;
+        t_outX = (pMax.x - ray.origin.x) * invDir.x;
 
-    // if (!dirIsNeg[1]) std::swap(tn.y, tx.y);
+    }else if (ray.direction.x ==0.0 ){
+        t_inX = __FLT_MAX__;
+        t_outX = __FLT_MAX__;
 
-    // if (!dirIsNeg[2]) std::swap(tn.z, tx.z);
+    }else {
+        t_outX = (pMin.x - ray.origin.x) * invDir.x;
+        t_inX = (pMax.x - ray.origin.x) * invDir.x;
+    }
 
-    // float t_enter = std::max(tn.x, std::max(tn.y, tn.z));
-    // float t_exit = std::min(tx.x, std::min(tx.y, tx.z));
+    if (ray.direction.y >0){
+        t_inY = (pMin.y - ray.origin.y) * invDir.y;
+        t_outY = (pMax.y - ray.origin.y) * invDir.y;
 
-    // return t_enter < t_exit && t_exit > 0;
+    }else if (ray.direction.y ==0.0 ){
+        t_inY = __FLT_MAX__;
+        t_outY = __FLT_MAX__;
 
-    float t_enter, t_exit;
-    Vector3f t_enter_v3f = (pMin - ray.origin) * invDir;
-    Vector3f t_exit_v3f = (pMax - ray.origin) * invDir;
+    }else{
+        t_outY = (pMin.y - ray.origin.y) * invDir.y;
+        t_inY = (pMax.y - ray.origin.y) * invDir.y;
+    }
 
-    if(!dirIsNeg[0]) std::swap(t_enter_v3f.x, t_exit_v3f.x);
-    if(!dirIsNeg[1]) std::swap(t_enter_v3f.y, t_exit_v3f.y);
-    if(!dirIsNeg[2]) std::swap(t_enter_v3f.z, t_exit_v3f.z);
+    if (ray.direction.z >0 ){
+        t_inZ = (pMin.z - ray.origin.z) * invDir.z;
+        t_outZ = (pMax.z - ray.origin.z) * invDir.z;
 
-    t_enter = std::max(t_enter_v3f.x, std::max(t_enter_v3f.y, t_enter_v3f.z));
-    t_exit = std::min(t_exit_v3f.x, std::max(t_exit_v3f.y, t_exit_v3f.z));
+    }else if (ray.direction.z ==0.0 ){
+        t_inZ = __FLT_MAX__;
+        t_outZ = __FLT_MAX__;
 
-    return (t_enter <= t_exit && t_exit >= 0);
+    }else{
+        t_outZ = (pMin.z - ray.origin.z) * invDir.z;
+        t_inZ = (pMax.z - ray.origin.z) * invDir.z;
+    }
+    float t_min = std::max(std::max(t_inX,t_inY),t_inZ);
+    float t_max = std::min(std::min(t_outX,t_outY),t_outZ);
 
-    // double tMin = (operator[](dirIsNeg[0]).x - ray.origin.x) * invDir.x;
-    // double tMax = (operator[](!dirIsNeg[0]).x - ray.origin.x) * invDir.x;
-    // double tyMin = (operator[](dirIsNeg[1]).y - ray.origin.y) * invDir.y;
-    // double tyMax = (operator[](!dirIsNeg[1]).y - ray.origin.y) * invDir.y;
-
-    // // Update t_min and t_max based on y slab intersection
-    // if ((tMin > tyMax) || (tyMin > tMax))
-    //     return false;
-    // if (tyMin > tMin)
-    //     tMin = tyMin;
-    // if (tyMax < tMax)
-    //     tMax = tyMax;
-
-    // // Check for z slab intersection
-    // double tzMin = (operator[](dirIsNeg[2]).z - ray.origin.z) * invDir.z;
-    // double tzMax = (operator[](!dirIsNeg[2]).z - ray.origin.z) * invDir.z;
-
-    // // Update t_min and t_max based on z slab intersection
-    // if ((tMin > tzMax) || (tzMin > tMax))
-    //     return false;
-    // if (tzMin > tMin)
-    //     tMin = tzMin;
-    // if (tzMax < tMax)
-    //     tMax = tzMax;
-
-    // // Check if the final t_min and t_max values are within the ray's bounds
-    // return (tMin < ray.t_max) && (tMax > ray.t_min);
+    if ( t_max >= t_min &&t_max >= 0 )
+        return true;
+    return false;
 }
 
 inline Bounds3 Union(const Bounds3& b1, const Bounds3& b2)

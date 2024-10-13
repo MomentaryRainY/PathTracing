@@ -1,3 +1,5 @@
+# PathTracing
+resources are from Games101
 
-I've finished task ...
-
+# Effect
+![img](/build/result.png)  

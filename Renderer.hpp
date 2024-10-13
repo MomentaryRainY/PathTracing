@@ -16,6 +16,7 @@ class Renderer
 {
 public:
     void Render(const Scene& scene);
-
+    void UpdateProgress(float progress);
 private:
+    std::atomic<int> pixelsRendered{0}; // 使用原子操作来统计已渲染的像素数，保证线程安全
 };
